@@ -1,174 +1,227 @@
-#include<SFML/Graphics.hpp>
-#include<iostream>
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <unistd.h>
+
 using namespace std;
 using namespace sf;
 
-int main(){
-    #pragma region
-    VideoMode vm(1920,1080);
-    RenderWindow window(vm,"Timber",Style::Fullscreen);
-    View view(FloatRect(0,0,1920,1080));
+int main()
+{
+#pragma region VM
+    VideoMode vm(1920, 1080);
+    RenderWindow window(vm, "Timber", Style::Fullscreen);
+    View view(FloatRect(0, 0, 1920, 1080));
     window.setView(view);
+#pragma endregion
+    float barWidth = 400.0f, barHeight = 50.0f;
+    float elapsedTime = 3.0f;
+    float barWidthPerSecond = barWidth / elapsedTime;
 
-    //For Background
+#pragma region BG,Tree,Bee
+    // For Background
     Texture textureBackground;
     textureBackground.loadFromFile("graphics/background.png");
     Sprite spriteBackground(textureBackground);
-    spriteBackground.setPosition(0,0);
+    spriteBackground.setPosition(0, 0);
 
-    //For Tree
+    // For Tree
     Texture textureTree;
-    textureTree.loadFromFile("graphics/tree2.png");
+    textureTree.loadFromFile("graphics/tree.png");
     Sprite spriteTree(textureTree);
-    spriteTree.setPosition(810,0);
+    spriteTree.setPosition(810, 0);
 
-    //For Bee
+    // For Bee
     Texture textureBee;
     textureBee.loadFromFile("graphics/bee.png");
     Sprite spriteBee(textureBee);
-    spriteBee.setPosition(0,800);
+    spriteBee.setPosition(0, 800);
 
-    //For Clouds
+    // For Clouds
     Texture textureCloud;
     textureCloud.loadFromFile("graphics/cloud.png");
     Sprite spriteCloud1(textureCloud);
     Sprite spriteCloud2(textureCloud);
     Sprite spriteCloud3(textureCloud);
-    spriteCloud1.setPosition(0,0);
-    spriteCloud2.setPosition(0,150);
-    spriteCloud3.setPosition(0,300);
-    //SpriteCloud2.setScale(0.5,0.5);
-    
-    //text
-    String messageString="Enter \'Space Bar\' to start";
+    spriteCloud1.setPosition(0, 0);
+    spriteCloud2.setPosition(0, 150);
+    spriteCloud3.setPosition(0, 300);
+    // spriteCloud2.setScale(0.5,0.5);
+
+    String messageString = "Enter \'Space Bar\' to Start";
     Font font;
     font.loadFromFile("fonts/KOMIKAP_.ttf");
+
     Text messageText;
     messageText.setFont(font);
     messageText.setFillColor(Color::Cyan);
     messageText.setCharacterSize(70);
     messageText.setString(messageString);
-    FloatRect rect=messageText.getLocalBounds();
-    // messageText.setOrigin(rect.width/2,rect.height/2);
-    // messageText.setPosition(1920/2,1080/2);
-    messageText.setOrigin(rect.width/2,rect.height/2);
-    messageText.setPosition(1920/2,1080/2);
-    
+    messageText.setOrigin(messageText.getLocalBounds().width / 2, messageText.getLocalBounds().height / 2);
+    messageText.setPosition(1920 / 2, 1080 / 2);
 
+    Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setFillColor(Color::Red);
+    scoreText.setCharacterSize(100);
+    scoreText.setString("Score : 0");
+    scoreText.setPosition(20, 20);
 
+    Text pauseText;
+    pauseText.setFont(font);
+    pauseText.setFillColor(Color::Green);
+    pauseText.setCharacterSize(80);
+    pauseText.setString("Press 'P' to Pause/Unpause");
+    pauseText.setOrigin(pauseText.getLocalBounds().width / 2, pauseText.getLocalBounds().height / 2);
+    pauseText.setPosition(1920 / 2, 1080 / 2);
 
-    float beeSpeed=200;
-    bool beeActive=false;
-    int cloud1Speed=1000, cloud2Speed=1000,cloud3Speed=1000;
-    bool cloud1Active=false,cloud2Active=false,cloud3Active=false;
-    bool gamePaused=true;
+    Text gameOverText;
+    gameOverText.setFont(font);
+    gameOverText.setFillColor(Color::Green);
+    gameOverText.setCharacterSize(80);
+    gameOverText.setString("Game Over");
+    gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
+    gameOverText.setPosition(2000, 2000);
+
+    RectangleShape timebar(Vector2f(barWidth, barHeight));
+    timebar.setFillColor(Color::Red);
+    timebar.setPosition(view.getSize().x / 2 - barWidth / 2, view.getSize().y - 75);
+
+#pragma endregion
+
+    int beeSpeed = 1000;
+    bool beeActive = false;
+    int cloud1Speed = 1000, cloud2Speed = 1000, cloud3Speed = 1000;
+    bool cloud1Active = false, cloud2Active = false, cloud3Active = false;
+    bool gamePaused = true, gameOver = true;
 
     Clock clock;
     Time dt;
-
-    int x=1920;
-
-
-    while(window.isOpen()){
-        dt=clock.restart();
+    while (window.isOpen())
+    {
+        dt = clock.restart();
         Event event;
-        while (window.pollEvent(event)){
-            if (event.type==Event::Closed){
+        while (window.pollEvent(event))
+        {
+            if (event.type == Event::Closed)
                 window.close();
-            }
-            if (event.type==Event::KeyPressed){
-                if(event.key.code==Keyboard::Escape){
+            if (event.type == Event::KeyPressed)
+            {
+                if (event.key.code == Keyboard::Escape)
                     window.close();
+                if (event.key.code == Keyboard::Space && gameOver)
+                {
+                    // restarting our game
+                    elapsedTime = 3.0f;
+                    gameOver = false;
+                    gamePaused = false;
+                    gameOverText.setPosition(2000, 2000);
+                    clock.restart();
                 }
-                if(event.key.code==Keyboard::Space){
-                    gamePaused=false;
-
-
+                if (event.key.code == Keyboard::P && !gameOver)
+                {
+                    // pause or unpause our game
+                    gamePaused = !gamePaused;
+                    clock.restart();
                 }
             }
         }
 
-        if(!gamePaused){
-        if(!beeActive){//for bee
-            srand(time(0));
-            int height=rand()%300+650;
-            spriteBee.setPosition(2000,height);
-            beeSpeed=rand()%450+150;
-            beeActive=true;
-        }else{
-            spriteBee.setPosition(spriteBee.getPosition().x - beeSpeed*dt.asSeconds(),spriteBee.getPosition().y);
-            if(spriteBee.getPosition().x<-100){
-                beeActive=false;
+        if (!gamePaused)
+        {
+            elapsedTime -= dt.asSeconds();
+            timebar.setSize(Vector2f(elapsedTime * barWidthPerSecond, barHeight));
+
+            if (elapsedTime < 0)
+            {
+                gameOver = true;
+                gamePaused = true;
+                gameOverText.setString("Game Over");
+                gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
+                gameOverText.setPosition(1920 / 2, 1080 / 2 - 100);
             }
-        }
-
-
-        if(!cloud1Active){//For cloud1
-            srand(time(0));
-            int height=rand()%150;
-            spriteCloud1.setPosition(-100,height);
-            cloud1Speed=rand()%200+50;
-            cloud1Active=true;
-            float scale=(float)(rand()%40 + 60)/100;
-            spriteCloud1.setScale(scale,scale);
-
-        }else{
-            spriteCloud1.setPosition(spriteCloud1.getPosition().x + cloud1Speed*dt.asSeconds(),spriteCloud1.getPosition().y);
-            if(spriteCloud1.getPosition().x>2000){
-                cloud1Active=false;
+#pragma region animation_bee_cloud
+            if (!beeActive)
+            { // For Bee movement
+                srand(time(0));
+                int height = rand() % 300 + 650;
+                spriteBee.setPosition(2000, height);
+                beeSpeed = rand() % 450 + 150;
+                beeActive = true;
             }
-        }
-        
-
-        if(!cloud2Active){//For cloud2
-            srand(time(0)+30);
-            int height=rand()%150+150;
-            spriteCloud2.setPosition(-100,height);
-            cloud2Speed=rand()%200+50;
-            cloud2Active=true;
-            float scale=(float)(rand()%40 + 60)/100;
-            spriteCloud2.setScale(scale,scale);
-
-        }else{
-            spriteCloud2.setPosition(spriteCloud2.getPosition().x + cloud2Speed*dt.asSeconds(),spriteCloud2.getPosition().y);
-            if(spriteCloud2.getPosition().x>2000){
-                cloud2Active=false;
+            else
+            {
+                spriteBee.setPosition(spriteBee.getPosition().x - beeSpeed * dt.asSeconds(), spriteBee.getPosition().y);
+                if (spriteBee.getPosition().x < -100)
+                    beeActive = false;
             }
-        }
-        
 
-        if(!cloud3Active){//For cloud3
-            srand(time(0)+50);
-            int height=rand()%150+300;
-            spriteCloud3.setPosition(-100,height);
-            cloud3Speed=rand()%200+50;
-            cloud3Active=true;
-            float scale=(float)(rand()%40 + 60)/100;
-            spriteCloud3.setScale(scale,scale);
-        }else{
-            spriteCloud3.setPosition(spriteCloud3.getPosition().x + cloud3Speed*dt.asSeconds(),spriteCloud3.getPosition().y);
-            if(spriteCloud3.getPosition().x>2000){
-                cloud3Active=false;
+            if (!cloud1Active)
+            { // For Cloud1 movement
+                srand(time(0));
+                int height = rand() % 150;
+                spriteCloud1.setPosition(-100, height);
+                cloud1Speed = rand() % 200 + 50;
+                cloud1Active = true;
+                float scale = (float)(rand() % 40 + 60) / 100;
+                spriteCloud1.setScale(scale, scale);
             }
+            else
+            {
+                spriteCloud1.setPosition(spriteCloud1.getPosition().x + cloud1Speed * dt.asSeconds(), spriteCloud1.getPosition().y);
+                if (spriteCloud1.getPosition().x > 2000)
+                    cloud1Active = false;
+            }
+            if (!cloud2Active)
+            { // For Cloud2 movement
+                srand(time(0) + 30);
+                int height = rand() % 150 + 150;
+                spriteCloud2.setPosition(-100, height);
+                cloud2Speed = rand() % 200 + 50;
+                cloud2Active = true;
+                float scale = (float)(rand() % 40 + 60) / 100;
+                spriteCloud2.setScale(scale, scale);
+            }
+            else
+            {
+                spriteCloud2.setPosition(spriteCloud2.getPosition().x + cloud2Speed * dt.asSeconds(), spriteCloud2.getPosition().y);
+                if (spriteCloud2.getPosition().x > 2000)
+                    cloud2Active = false;
+            }
+            if (!cloud3Active)
+            { // For Cloud3 movement
+                srand(time(0) + 50);
+                int height = rand() % 150 + 300;
+                spriteCloud3.setPosition(-100, height);
+                cloud3Speed = rand() % 200 + 50;
+                cloud3Active = true;
+                float scale = (float)(rand() % 40 + 60) / 100;
+                spriteCloud3.setScale(scale, scale);
+            }
+            else
+            {
+                spriteCloud3.setPosition(spriteCloud3.getPosition().x + cloud3Speed * dt.asSeconds(), spriteCloud3.getPosition().y);
+                if (spriteCloud3.getPosition().x > 2000)
+                    cloud3Active = false;
+            }
+#pragma endregion
         }
-    }
-
 
         window.clear();
         window.draw(spriteBackground);
-        window.draw(spriteBee);
         window.draw(spriteCloud1);
         window.draw(spriteCloud2);
         window.draw(spriteCloud3);
-        
         window.draw(spriteTree);
-        if(gamePaused){
-        window.draw(messageText);
-        }
-        
+        window.draw(spriteBee);
+        window.draw(timebar);
+        if (gamePaused && !gameOver)
+            window.draw(pauseText);
+        if (gameOver)
+            window.draw(messageText);
+        window.draw(scoreText);
+        window.draw(gameOverText);
         window.display();
     }
-    
 
     return 0;
 }
