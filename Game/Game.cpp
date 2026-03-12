@@ -91,6 +91,13 @@ int main()
     texturePlayer.loadFromFile("graphics/player.png");
     Sprite spritePlayer(texturePlayer);
     spritePlayer.setPosition(Player_L, 720);
+
+    // For Axe
+    Texture textureAxe;
+    textureAxe.loadFromFile("graphics/axe.png");
+    Sprite spriteAxe(textureAxe);
+    spriteAxe.setPosition(3000, 830);
+    
 #pragma endregion
 
     int beeSpeed = 1000;
