@@ -97,7 +97,7 @@ int main()
     textureAxe.loadFromFile("graphics/axe.png");
     Sprite spriteAxe(textureAxe);
     spriteAxe.setPosition(3000, 830);
-    
+
 #pragma endregion
 
     int beeSpeed = 1000;
@@ -120,17 +120,16 @@ int main()
             {
                 if (event.key.code == Keyboard::Escape)
                     window.close();
-                if (event.key.code == Keyboard::Space && gameOver)
-                {
+                if (event.key.code == Keyboard::Space && gameOver) {
                     // restarting our game
-                    elapsedTime = 3.0f;
-                    gameOver = false;
-                    gamePaused = false;
+                    score       = 0;
+                    elapsedTime = maxElapsedTime;
+                    gameOver    = false;
+                    gamePaused  = false;
                     gameOverText.setPosition(2000, 2000);
                     clock.restart();
                 }
-                if (event.key.code == Keyboard::P && !gameOver)
-                {
+                if (event.key.code == Keyboard::P && !gameOver) {
                     // pause or unpause our game
                     gamePaused = !gamePaused;
                     clock.restart();
