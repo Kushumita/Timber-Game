@@ -86,6 +86,11 @@ int main()
     timebar.setFillColor(Color::Red);
     timebar.setPosition(view.getSize().x / 2 - barWidth / 2, view.getSize().y - 75);
 
+    // For Player
+    Texture texturePlayer;
+    texturePlayer.loadFromFile("graphics/player.png");
+    Sprite spritePlayer(texturePlayer);
+    spritePlayer.setPosition(Player_L, 720);
 #pragma endregion
 
     int beeSpeed = 1000;
