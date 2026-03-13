@@ -5,7 +5,7 @@ The player must chop a tree as fast as possible while avoiding falling branches.
 
 This project demonstrates the use of **game loops, sprites, textures, and event handling** in C++.
 
---
+---
 
 ## 🎮 Gameplay
 
