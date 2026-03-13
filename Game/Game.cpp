@@ -5,6 +5,12 @@
 using namespace std;
 using namespace sf;
 
+#define NUM_BRANCHES 6
+enum class Side {LEFT,RIGHT,NONE};
+Sprite spriteBranches[NUM_BRANCHES];
+Side branchPosition[NUM_BRANCHES];
+
+
 int main() {
 #pragma region VM
     VideoMode    vm(1920, 1080);
@@ -114,6 +120,14 @@ int main() {
     textureAxe.loadFromFile("graphics/axe.png");
     Sprite spriteAxe(textureAxe);
     spriteAxe.setPosition(3000, 830);
+
+    //Branch
+    Texture textureBranch;
+    textureBranch.loadFromFile("graphics/branch.png");
+    for(int i=0; i<NUM_BRANCHES;i++){
+        spriteBranches[i].setTexture(textureBranch);
+        spriteBranches[i].setOrigin(spriteBranches[i].getLocalBounds().width/2,spriteBranches[i].getLocalBounds().height/2);
+    }
 
 #pragma endregion
 
@@ -229,6 +243,11 @@ int main() {
                     cloud3Active = false;
             }
 #pragma endregion
+            for(int i=0;i<NUM_BRANCHES;i++){
+                int height=i*150;
+                spriteBranches[i].setPosition(600,height);
+                spriteBranches[i].setRotation(180);
+            }
         }
 
         window.clear();
@@ -237,6 +256,9 @@ int main() {
         window.draw(spriteCloud2);
         window.draw(spriteCloud3);
         window.draw(spriteTree);
+        for(int i=0;i<NUM_BRANCHES;i++){
+            window.draw(spriteBranches[i]);
+        }
         window.draw(spriteBee);
         window.draw(timebar);
         if (gamePaused && !gameOver)
