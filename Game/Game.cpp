@@ -157,7 +157,7 @@ int  main() {
                     branchPosition[5]=Side::NONE;
                 }
                 if (event.key.code == Keyboard::P && !gameOver) {
-                    // pause or unpause our game
+                    // pause or play our game
                     gamePaused = !gamePaused;
                     clock.restart();
                 }
