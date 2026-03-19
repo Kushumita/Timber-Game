@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <unistd.h>
 
@@ -40,6 +41,9 @@ int  main() {
     const int   Axe_R             = 1075;
     int         score             = 0;
     Side        playerSide        = Side::LEFT;
+    bool        logActive         = false;
+    int         logSpeedX         = 5000;
+    int         logSpeedY         = -1500;
 #pragma endregion
 
 #pragma region Loading_Assets
@@ -51,7 +55,7 @@ int  main() {
 
     // For Tree
     Texture textureTree;
-    textureTree.loadFromFile("graphics/tree.png");
+    textureTree.loadFromFile("graphics/tree2.png");
     Sprite spriteTree(textureTree);
     spriteTree.setPosition(810, 0);
 
@@ -131,11 +135,35 @@ int  main() {
         spriteBranches[i].setOrigin(spriteBranches[i].getLocalBounds().width / 2, spriteBranches[i].getLocalBounds().height / 2);
     }
 
-    //For RIP
+    // For RIP
     Texture textureRIP;
     textureRIP.loadFromFile("graphics/rip.png");
     Sprite spriteRIP(textureRIP);
-    spriteRIP.setPosition(3000, 830);
+    spriteRIP.setPosition(Player_L, 762);
+
+    // For Log
+    Texture textureLog;
+    textureLog.loadFromFile("graphics/log.png");
+    Sprite spriteLog(textureLog);
+    spriteLog.setPosition(810, 760);
+
+    //Audio Chop
+    SoundBuffer chopBuffer;
+    chopBuffer.loadFromFile("sound/chop.wav");
+    Sound chop;
+    chop.setBuffer(chopBuffer);
+
+    //Audio death
+    SoundBuffer chopDeath;
+    chopDeath.loadFromFile("sound/death.wav");
+    Sound death;
+    death.setBuffer(chopDeath);
+
+    //Audio oot
+    SoundBuffer chopOOT;
+    chopOOT.loadFromFile("sound/out_of_time.wav");
+    Sound oot;
+    oot.setBuffer(chopOOT);
 
 #pragma endregion
 
@@ -158,10 +186,15 @@ int  main() {
                     gamePaused  = false;
                     gameOverText.setPosition(2000, 2000);
                     clock.restart();
-                    for(int i=0;i<NUM_BRANCHES-1;i++){
+                    for (int i = 0; i < NUM_BRANCHES - 1; i++) {
                         updateBranch(time(0) + i);
                     }
-                    branchPosition[5]=Side::NONE;
+                    branchPosition[5] = Side::NONE;
+                    spriteRIP.setPosition(3000, spriteRIP.getPosition().y);
+                    spritePlayer.setPosition(Player_L, spritePlayer.getPosition().y);
+                    playerSide = Side::LEFT;
+                    spriteLog.setPosition(810,760);
+                    logActive =false;
                 }
                 if (event.key.code == Keyboard::P && !gameOver) {
                     // pause or unpause our game
@@ -176,6 +209,9 @@ int  main() {
                     spritePlayer.setPosition(Player_L, spritePlayer.getPosition().y);
                     spriteAxe.setPosition(Axe_L, spriteAxe.getPosition().y);
                     updateBranch(score);
+                    logActive = true;
+                    logSpeedX = 5000;
+                    chop.play();
                 }
                 if (event.key.code == Keyboard::Right && !gamePaused) {
                     score++;
@@ -185,6 +221,9 @@ int  main() {
                     spritePlayer.setPosition(Player_R, spritePlayer.getPosition().y);
                     spriteAxe.setPosition(Axe_R, spriteAxe.getPosition().y);
                     updateBranch(score);
+                    logActive = true;
+                    logSpeedX = -5000;
+                    chop.play();
                 }
             }
             if (event.type == Event::KeyReleased) {
@@ -204,9 +243,10 @@ int  main() {
                 gameOverText.setString("Game Over");
                 gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
                 gameOverText.setPosition(1920 / 2, 1080 / 2 - 100);
+                oot.play();
             }
             scoreText.setString("Score = " + std::to_string(score));
-#pragma region animation_bee_cloud
+#pragma region animation_bee_cloud_log
             if (!beeActive) { // For Bee movement
                 srand(time(0));
                 int height = rand() % 300 + 650;
@@ -258,6 +298,16 @@ int  main() {
                 if (spriteCloud3.getPosition().x > 2000)
                     cloud3Active = false;
             }
+            if(logActive){  //For Log movement
+                float newX = spriteLog.getPosition().x+logSpeedX*dt.asSeconds();
+                float newY = spriteLog.getPosition().y+logSpeedY*dt.asSeconds();
+                spriteLog.setPosition(newX,newY);
+
+                if(newX>2000 || newX<-200){
+                    logActive = false;
+                    spriteLog.setPosition(810,760);
+                }
+            }
 #pragma endregion
             for (int i = 0; i < NUM_BRANCHES; i++) {
                 int height = i * 150;
@@ -271,12 +321,15 @@ int  main() {
                     spriteBranches[i].setPosition(3000, height);
                 }
             }
-            if(playerSide == branchPosition[5]){
-                gameOver = true;
+            if (playerSide == branchPosition[5]) {
+                gameOver   = true;
                 gamePaused = true;
                 gameOverText.setString("Squished");
                 gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
                 gameOverText.setPosition(1920 / 2, 1080 / 2 - 100);
+                spriteRIP.setPosition((playerSide==Side::LEFT)?Player_L:Player_R, spriteRIP.getPosition().y);
+                spritePlayer.setPosition(3000, spritePlayer.getPosition().y);
+                death.play();
             }
         }
 
@@ -285,6 +338,7 @@ int  main() {
         window.draw(spriteCloud1);
         window.draw(spriteCloud2);
         window.draw(spriteCloud3);
+        window.draw(spriteLog);
         window.draw(spriteTree);
         for (int i = 0; i < NUM_BRANCHES; i++) {
             window.draw(spriteBranches[i]);
@@ -299,6 +353,7 @@ int  main() {
         window.draw(gameOverText);
         window.draw(spritePlayer);
         window.draw(spriteAxe);
+        window.draw(spriteRIP);
         window.display();
     }
 
