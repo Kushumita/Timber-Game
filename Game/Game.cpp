@@ -130,6 +130,13 @@ int  main() {
         spriteBranches[i].setTexture(textureBranch);
         spriteBranches[i].setOrigin(spriteBranches[i].getLocalBounds().width / 2, spriteBranches[i].getLocalBounds().height / 2);
     }
+
+    //For RIP
+    Texture textureRIP;
+    textureRIP.loadFromFile("graphics/rip.png");
+    Sprite spriteRIP(textureRIP);
+    spriteRIP.setPosition(3000, 830);
+
 #pragma endregion
 
     Clock clock;
@@ -157,7 +164,7 @@ int  main() {
                     branchPosition[5]=Side::NONE;
                 }
                 if (event.key.code == Keyboard::P && !gameOver) {
-                    // pause or play our game
+                    // pause or unpause our game
                     gamePaused = !gamePaused;
                     clock.restart();
                 }
