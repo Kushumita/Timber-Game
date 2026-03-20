@@ -52,7 +52,7 @@ cd Timber-Game\Game
 ### 3. Compile the program
 
 ```
-g++ Game.cpp -std=c++17 -IC:\SFML\include -LC:\SFML\lib -lsfml-graphics -lsfml-window -lsfml-system -o Game
+g++ Game.cpp -std=c++17 -IC:\SFML\include -LC:\SFML\lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -o Game
 ```
 
 ### 4. Run the game
