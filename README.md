@@ -23,7 +23,7 @@ This project demonstrates the use of **game loops, sprites, textures, and event 
 * Object-Oriented Programming
 * Game Loop & Event Handling
 
---
+---
 
 ## ⚙️ Requirements
 
